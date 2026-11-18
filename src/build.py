@@ -23,10 +23,14 @@ TARGETS = [
 ]
 
 def unit_files(prefix):
-    """מיון מספרי — מיון לקסיקוגרפי היה שם את u10 לפני u2."""
-    fs = [f for f in glob.glob(os.path.join(HERE, prefix + "*.js"))
-          if re.fullmatch(re.escape(prefix) + r"\d+\.js", os.path.basename(f))]
-    return sorted(fs, key=lambda f: int(re.search(r"(\d+)\.js$", os.path.basename(f)).group(1)))
+    """מיון מספרי — מיון לקסיקוגרפי היה שם את u10 לפני u2.
+    אות אחרי המספר מסמנת קובץ נוסף לאותה יחידה: u1z.js = שאלות ממפגש הזום, אחרי u1.js."""
+    pat = re.compile(re.escape(prefix) + r"(\d+)([a-z]?)\.js")
+    fs = [f for f in glob.glob(os.path.join(HERE, prefix + "*.js")) if pat.fullmatch(os.path.basename(f))]
+    def key(f):
+        m = pat.fullmatch(os.path.basename(f))
+        return int(m.group(1)), m.group(2)
+    return sorted(fs, key=key)
 
 def bank_files():
     return unit_files("u")
